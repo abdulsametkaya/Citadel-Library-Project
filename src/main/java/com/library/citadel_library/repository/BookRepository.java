@@ -1,7 +1,7 @@
 package com.library.citadel_library.repository;
 
-import com.library.domain.Book;
-import com.library.dto.BookDTO;
+import com.library.citadel_library.domain.Book;
+import com.library.citadel_library.dto.BookDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    @Query("SELECT new com.library.dto.BookDTO(book) from Book book where (book.name = :query or book.author.name = :query or book.isbn =:query or :query is null ) and (book.category.id = :cat or :cat is null ) and (book.author.id = :author or :author is null ) and (book.publisher.id = :publisher or :publisher is null )")
+    @Query("SELECT new com.library.citadel_library.dto.BookDTO(book) from Book book where (book.name = :query or book.author.name = :query or book.isbn =:query or :query is null ) and (book.category.id = :cat or :cat is null ) and (book.author.id = :author or :author is null ) and (book.publisher.id = :publisher or :publisher is null )")
     Page<BookDTO> findByQueryAndCatAndAuthorAndPublisherWithPage(@Param("query") Optional<String> query,
                                                                  @Param("cat") Optional<Long> cat,
                                                                  @Param("author") Optional<Long> author,

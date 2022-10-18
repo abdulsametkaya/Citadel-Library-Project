@@ -1,9 +1,7 @@
 package com.library.citadel_library.dto.mapper;
 
-import com.library.DTO.LoanDTO;
-import com.library.domain.Book;
-import com.library.domain.Loan;
-import com.library.dto.BookDTO;
+import com.library.citadel_library.dto.LoanDTO;
+import com.library.citadel_library.domain.Loan;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel="spring")

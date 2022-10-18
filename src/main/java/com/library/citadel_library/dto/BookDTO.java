@@ -1,8 +1,10 @@
 package com.library.citadel_library.dto;
 
+import com.library.citadel_library.domain.Book;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -57,4 +59,21 @@ public class BookDTO {
     @NotNull(message="Please provide create publisher")
     private Long publisher_id;
 
+    public BookDTO(Book book) {
+        this.id = book.getId();
+        this.name = book.getName();
+        this.isbn = book.getIsbn();
+        this.pageCount = book.getPageCount();
+        this.publishDate = book.getPublishDate();
+        this.image = book.getImage();
+        this.loanable = book.getLoanable();
+        this.shelfCode = book.getShelfCode();
+        this.active = book.getActive();
+        this.featured = book.getFeatured();
+        this.createDate = book.getCreateDate();
+        this.builtIn = book.getBuiltIn();
+        this.author_id = book.getAuthor().getId();
+        this.category_id = book.getCategory().getId();
+        this.publisher_id = book.getPublisher().getId();
+    }
 }
