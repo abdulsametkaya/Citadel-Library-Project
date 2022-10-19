@@ -1,7 +1,7 @@
 package com.library.citadel_library.service;
 
-
 import com.library.citadel_library.domain.Author;
+import com.library.citadel_library.exception.BadRequestException;
 import com.library.citadel_library.exception.ConflictException;
 import com.library.citadel_library.exception.ResourceNotFoundException;
 import com.library.citadel_library.exception.message.ErrorMessage;
@@ -26,7 +26,7 @@ public class AuthorService {
     }
 
     public Page<Author> getAllAuthorsWithPage(Pageable pageable){
-        return authorRepository.findAllPublishersWithPage(pageable);
+        return authorRepository.findAll(pageable);
     }
 
     public void createAuthor(Author author){
@@ -35,21 +35,26 @@ public class AuthorService {
 
     public Author updateAuthor(Author author, Long id) {
         Author foundAuthor = getAuthorById(id);
-        foundAuthor.setName(author.getName());
-        foundAuthor.setBuiltIn(author.getBuiltIn());
 
-        authorRepository.save(foundAuthor);
+        if (foundAuthor.getBuiltIn()){
+            throw new BadRequestException(String.format(ErrorMessage.AUTHOR_BUILTIN_TRUE_UPDATE_MESSAGE,id));
+        }else {
+            foundAuthor.setName(author.getName());
+            foundAuthor.setBuiltIn(author.getBuiltIn());
+            authorRepository.save(foundAuthor);
+        }
         return foundAuthor;
     }
 
     public Author deleteAuthor(Long id) {
         Author foundAuthor = getAuthorById(id);
 
-        if (bookRepository.existsBookAuthorId(id) != null){
+        if (foundAuthor.getBuiltIn()){
+            throw new BadRequestException(String.format(ErrorMessage.AUTHOR_BUILTIN_TRUE_DELETE_MESSAGE,id));
+        } else if (!bookRepository.existsBookAuthorId(id).isEmpty()){
             throw new ConflictException(String.format(ErrorMessage.AUTHOR_NOT_DELETE_MESSAGE,id));
-        }else{
-            authorRepository.deleteById(id);
         }
+        authorRepository.deleteById(id);
         return foundAuthor;
     }
 
