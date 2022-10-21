@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.io.File;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -31,41 +30,31 @@ public class BookDTO {
 
     @NotNull(message="Please provide publish date")
     private Integer publishDate;
-
-    private File image;
-
     private Boolean loanable = true;
-
     @NotNull(message="Please provide shelf code ")
     @Size(min=6, max=6,message="ShelfCode '${validatedValue}' must be {max} chars long")
     @Pattern(regexp = "^[A-Z]{2}-\\d{3}$",message = "Please provide valid shelf code")
     private String shelfCode;
-
     private Boolean active = true;
-
     private Boolean featured = false;
-
     @NotNull(message="Please provide create date")
     private LocalDateTime createDate = LocalDateTime.now();
-
     private Boolean builtIn = false;
-
     @NotNull(message="Please provide create author")
     private Long author_id;
 
+    private String image_id;
     @NotNull(message="Please provide create category")
     private Long category_id;
-
     @NotNull(message="Please provide create publisher")
     private Long publisher_id;
-
     public BookDTO(Book book) {
         this.id = book.getId();
         this.name = book.getName();
         this.isbn = book.getIsbn();
         this.pageCount = book.getPageCount();
         this.publishDate = book.getPublishDate();
-        this.image = book.getImage();
+        this.image_id = book.getImage().getId();
         this.loanable = book.getLoanable();
         this.shelfCode = book.getShelfCode();
         this.active = book.getActive();

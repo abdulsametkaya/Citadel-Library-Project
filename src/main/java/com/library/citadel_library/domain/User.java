@@ -1,6 +1,6 @@
 package com.library.citadel_library.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,9 +36,8 @@ public class User {
     @Column(length = 30,nullable = false)
     private String lastName;
 
-    // TODO score ile ilgili detaylar sorulacak
     @NotNull(message="Please provide score")
-    @Size(min=-2, max=2,message="Score '${validatedValue}' must be between {min} and {max} chars long")
+    //@Size(min=-2, max=2,message="Score '${validatedValue}' must be between {min} and {max} chars long")
     @Column(nullable = false)
     private Integer score = 0;
 
@@ -59,10 +58,11 @@ public class User {
     @Email(message = "Please provide valid email")
     @NotNull(message="Please provide email")
     @Size(min=10, max=80,message="Email '${validatedValue}' must be between {min} and {max} chars long")
-    @Column(length = 80,nullable = false)
+    @Column(length = 80,nullable = false,unique = true)
     private String email;
 
-    @JsonIgnore
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotNull(message="Please provide password")
     @Column(nullable = false)
     private String password;
@@ -71,7 +71,11 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime createDate;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String resetPasswordCode;
+
+    @Column(nullable = false)
+    private Boolean isActive=true;
 
     @NotNull(message="Please provide user builtIn")
     @Column(nullable = false)
@@ -83,7 +87,9 @@ public class User {
             inverseJoinColumns=@JoinColumn(name="role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    public User(String firstName, String lastName, Integer score, String address, String phone, Date birthDate, String email, String password, LocalDateTime createDate, String resetPasswordCode, Boolean builtIn, Set<Role> roles) {
+
+    public User(String firstName, String lastName, Integer score, String address, String phone, Date birthDate, String email,
+                String password, LocalDateTime createDate, String resetPasswordCode, Boolean builtIn, Set<Role> roles, boolean isActive) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.score = score;
@@ -96,5 +102,6 @@ public class User {
         this.resetPasswordCode = resetPasswordCode;
         this.builtIn = builtIn;
         this.roles = roles;
+        this.isActive=isActive;
     }
 }

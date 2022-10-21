@@ -1,6 +1,5 @@
 package com.library.citadel_library.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,7 +8,6 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Getter
@@ -30,14 +28,13 @@ public class Loan {
     @Column(nullable = false)
     private LocalDateTime expireDate;
 
-    @NotNull(message="Please provide return")
-    @Column(nullable = false)
+
+    @Column
     private LocalDateTime returnDate;
 
     @Column(length = 300)
     private String notes;
 
-    //TODO @jsonignore annotation koymak doğru olur mu ? sorulacak.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -45,7 +42,7 @@ public class Loan {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    //@OnDelete(action = OnDeleteAction.CASCADE)
     private Book book;
 
     public Loan(LocalDateTime loanDate, LocalDateTime expireDate, LocalDateTime returnDate, String notes, User user, Book book) {

@@ -9,26 +9,27 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Optional;
 
 @AllArgsConstructor
-@RequestMapping("/book")
+@RequestMapping("/books")
 @RestController
 public class BookController {
 
     BookService bookService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/book/{id}")
     public ResponseEntity<BookDTO> getOneBook(@PathVariable Long id){
         BookDTO book = bookService.getOneBookById(id);
 
         return new ResponseEntity<>(book,HttpStatus.OK);
     }
 
-    @GetMapping("/pages")
+    @GetMapping("/all")
     public ResponseEntity<Page<BookDTO>> getAllWithPage(@RequestParam("name") Optional<String> p,
                                                         @RequestParam("cat") Optional<Long> categortyId,
                                                         @RequestParam("author") Optional<Long> authorId,
@@ -45,6 +46,7 @@ public class BookController {
         return new ResponseEntity<>(bookPage,HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<BookDTO> createBook(@Valid @RequestBody BookDTO bookDto){
 
@@ -53,6 +55,7 @@ public class BookController {
         return new ResponseEntity<>(book, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<BookDTO> updateBook(@PathVariable Long id, @Valid @RequestBody BookDTO bookDTO){
 
@@ -61,7 +64,8 @@ public class BookController {
         return new ResponseEntity<>(book,HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/delete/{id}")
     public ResponseEntity<BookDTO> deleteOneBook(@PathVariable Long id){
 
         BookDTO book = bookService.deleteOneBookById(id);
@@ -69,6 +73,4 @@ public class BookController {
         return new ResponseEntity<>(book,HttpStatus.OK);
 
     }
-
-
 }
