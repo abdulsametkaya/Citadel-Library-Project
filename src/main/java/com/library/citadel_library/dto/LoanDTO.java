@@ -1,7 +1,7 @@
 package com.library.citadel_library.dto;
 
-import com.library.domain.Book;
-import com.library.domain.User;
+import com.library.citadel_library.domain.Book;
+import com.library.citadel_library.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
