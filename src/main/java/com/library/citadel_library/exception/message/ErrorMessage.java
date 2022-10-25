@@ -12,6 +12,13 @@ public class ErrorMessage {
     public final static String INVALID_BOOK_PARAMETER_MESSAGE="Please write valid parameter";
     public final static String LOAN_NOT_FOUND_MESSAGE="Loan with id %d not found";
 
+    public final static String INVALID_USER_PARAMETER_MESSAGE="Please provide a valid parameter";
+    public final static String NOT_DELETE_USER_HAS_LOANS = "In order to delete the user, the loans process must be terminated.";
+    public final static String CANT_PROCESS__WITH_BUILT_IN_TRUE_USER="Can't process about this user";
+    public final static String PASSWORD_DOESNT_MATCH= "Password doesn't match";
+    public final static String STAFF_DOESNT_PROCESS_ABOUT_ADMIN="Staff doesn't process about Administrator";
+    public final static String STAFF_DOESNT_PROCESS_ABOUT_OTHER_STAFF="Only Administrator user process about staff user";
+    public final static String IMAGE_NOT_FOUND_MESSAGE="ImageFile with id %s not found";
 
     /* CATEGORY EXCEPTION MESSAGES */
     public final static String CATEGORY_NOT_FOUND_MESSAGE="Category with id %d not found";

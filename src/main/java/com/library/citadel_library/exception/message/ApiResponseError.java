@@ -19,7 +19,7 @@ public class ApiResponseError {
         this();
         this.status=status;
     }
-    public ApiResponseError(HttpStatus status, String message, String requestURI){
+    public ApiResponseError(HttpStatus status,String message,String requestURI){
         this(status);
         this.message=message;
         this.requestURI=requestURI;
