@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -40,6 +41,7 @@ public class AuthorController {
     }
 
     /* Create new Author */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<Author> createAuthor(@Valid @RequestBody Author author){
         authorService.createAuthor(author);
@@ -47,6 +49,7 @@ public class AuthorController {
     }
 
     /* Updates Current Author */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Author> updateAuthorById(@PathVariable Long id, @Valid @RequestBody Author author){
         Author updatedAuthor = authorService.updateAuthor(author, id);
@@ -54,6 +57,7 @@ public class AuthorController {
     }
 
     /* Delete Current Author */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Author> deleteAuthorById(@PathVariable Long id){
         Author author = authorService.deleteAuthor(id);
