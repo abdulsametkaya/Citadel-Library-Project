@@ -19,6 +19,7 @@
         <java.version>11</java.version>
         <jjwt.version>0.9.1</jjwt.version>
         <lombok.version>1.18.24</lombok.version>
+        <springdoc.openapi.version>1.6.9</springdoc.openapi.version>
     </properties>
     <dependencies>
         <dependency>
@@ -64,6 +65,14 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc.openapi.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
