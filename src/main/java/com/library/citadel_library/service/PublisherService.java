@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class PublisherService {
 
@@ -56,5 +58,10 @@ public class PublisherService {
 
         publisherRepository.deleteById(id);
         return foundPublisher;
+    }
+
+    public List<Publisher> findAll() {
+
+        return publisherRepository.findAll();
     }
 }

@@ -46,6 +46,12 @@ public class BookDTO {
     private String image_id;
     @NotNull(message="Please provide create category")
     private Long category_id;
+
+    private String categoryName;
+
+    private String publisherName;
+
+    private String authorName;
     @NotNull(message="Please provide create publisher")
     private Long publisher_id;
     public BookDTO(Book book) {
@@ -62,6 +68,9 @@ public class BookDTO {
         this.createDate = book.getCreateDate();
         this.builtIn = book.getBuiltIn();
         this.author_id = book.getAuthor().getId();
+        this.authorName = book.getAuthor().getName();
+        this.categoryName = book.getCategory().getName();
+        this.publisherName = book.getPublisher().getName();
         this.category_id = book.getCategory().getId();
         this.publisher_id = book.getPublisher().getId();
     }

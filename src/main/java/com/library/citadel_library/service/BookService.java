@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -31,6 +32,13 @@ public class BookService {
                 (String.format(ErrorMessage.BOOK_NOT_FOUND_MESSAGE, id)));
 
         BookDTO bookDTO = bookMapper.bookToBookDTO(book);
+        bookDTO.setPublisher_id(book.getPublisher().getId());
+        bookDTO.setAuthor_id(book.getAuthor().getId());
+        bookDTO.setCategory_id(book.getCategory().getId());
+        bookDTO.setImage_id(book.getImage().getId());
+        bookDTO.setAuthorName(book.getAuthor().getName());
+        bookDTO.setPublisherName(book.getPublisher().getName());
+        bookDTO.setCategoryName(book.getCategory().getName());
 
         return bookDTO;
     }
@@ -111,4 +119,17 @@ public class BookService {
         book.setPublisher(publisher);
         book.setImage(image);
     }
+
+    public List<BookDTO> findAll() {
+      List<BookDTO> booksList = bookRepository.findAllDTO();
+      return booksList;
+    }
+
+    public Page<BookDTO> getAllBooksWithPage(Pageable pageable) {
+
+       Page<BookDTO> books = bookRepository.findAllWithPage(pageable);
+
+       return books;
+    }
+
 }

@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -22,7 +23,7 @@ public class BookController {
 
     BookService bookService;
 
-    @GetMapping("/book/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<BookDTO> getOneBook(@PathVariable Long id){
         BookDTO book = bookService.getOneBookById(id);
 
@@ -44,6 +45,25 @@ public class BookController {
         Page<BookDTO> bookPage = bookService.findAllWithPage(p, categortyId, authorId, publisherId,pageable);
 
         return new ResponseEntity<>(bookPage,HttpStatus.OK);
+    }
+
+    @GetMapping("/allbooks")
+    public ResponseEntity<List<BookDTO>> getAll(){
+
+        List<BookDTO> books = bookService.findAll();
+
+        return new ResponseEntity<>(books,HttpStatus.OK);
+    }
+
+    @GetMapping("/bookspages")
+    public ResponseEntity<Page<BookDTO>>  getAllBooksWithPage(@RequestParam(required = false,value = "page", defaultValue = "0") int page,
+                                                      @RequestParam(required = false,value = "size", defaultValue = "20") int size,
+                                                      @RequestParam(required = false,value = "sort", defaultValue = "name") String prop,
+                                                      @RequestParam(required = false,value = "direction", defaultValue = "ASC") Sort.Direction direction){
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction,prop));
+        Page<BookDTO> booksPage = bookService.getAllBooksWithPage(pageable);
+        return new ResponseEntity<>(booksPage, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -73,4 +93,5 @@ public class BookController {
         return new ResponseEntity<>(book,HttpStatus.OK);
 
     }
+
 }

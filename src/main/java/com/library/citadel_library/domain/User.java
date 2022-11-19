@@ -89,7 +89,7 @@ public class User {
 
 
     public User(String firstName, String lastName, Integer score, String address, String phone, Date birthDate, String email,
-                String password, LocalDateTime createDate, String resetPasswordCode, Boolean builtIn, Set<Role> roles, boolean isActive) {
+                String password, LocalDateTime createDate, String resetPasswordCode, Boolean builtIn, Set<Role> roles,boolean isActive) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.score = score;

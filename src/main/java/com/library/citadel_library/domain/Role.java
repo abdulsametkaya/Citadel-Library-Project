@@ -4,6 +4,7 @@ import com.library.citadel_library.domain.enums.RoleType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -23,7 +24,4 @@ public class Role {
     @Column(nullable = false)
     private RoleType name;
 
-    public Role(RoleType name) {
-        this.name = name;
-    }
 }

@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/publishers")
@@ -32,6 +33,14 @@ public class PublisherController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction,prop));
         Page<Publisher> publisherPage = publisherService.getAllPublishersWithPage(pageable);
         return new ResponseEntity<>(publisherPage, HttpStatus.OK);
+    }
+
+    @GetMapping("/allpublishers")
+    public ResponseEntity<List<Publisher>> getAll(){
+
+        List<Publisher> publishers = publisherService.findAll();
+
+        return new ResponseEntity<>(publishers,HttpStatus.OK);
     }
 
     /* Get One Publisher with Publisher Id */

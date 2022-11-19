@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
@@ -37,6 +38,14 @@ public class CategoryController {
         return ResponseEntity.ok(catetegoryPage);
     }
 
+    @GetMapping("/allcategories")
+    public ResponseEntity<List<Category>> getAll(){
+
+        List<Category> categories = categoryService.findAll();
+
+        return new ResponseEntity<>(categories,HttpStatus.OK);
+    }
+
     //Get Category With Id
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategory(@PathVariable Long id){
@@ -57,7 +66,7 @@ public class CategoryController {
 
     // Update Category
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable Long id, @Valid @RequestBody Category category){
         categoryService.updateCategory(id,category);
 

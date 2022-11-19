@@ -27,7 +27,6 @@ public class Category {
     @Column(nullable = false)
     private Boolean builtIn = false;
 
-    //TODO Not null, default: one more than the largest number in sequence fields detaylar sorulacak
     @NotNull(message="Please provide sequence")
     @Column(nullable = false)
     private Integer sequence;

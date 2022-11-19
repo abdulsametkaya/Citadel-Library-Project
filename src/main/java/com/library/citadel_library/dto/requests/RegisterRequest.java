@@ -27,7 +27,6 @@ public class RegisterRequest {
     private String lastName;
 
     @NotNull(message="Please provide score")
-    //@Size(min=-2, max=2,message="Score '${validatedValue}' must be between {min} and {max} chars long")
     private Integer score = 0;
 
     @NotNull(message="Please provide address")
@@ -52,7 +51,7 @@ public class RegisterRequest {
     private String password;
 
     @NotNull(message="Please provide createDate")
-    private LocalDateTime createDate;
+    private LocalDateTime createDate = LocalDateTime.now();
     @NotNull
     private Boolean isActive=true;
 

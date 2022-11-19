@@ -1,5 +1,6 @@
 package com.library.citadel_library.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.library.citadel_library.domain.Role;
 import com.library.citadel_library.domain.User;
@@ -26,6 +27,8 @@ public class UserDTO {
     private Integer score;
     private String address;
     private String phone;
+
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy",timezone = "Turkey")
     private Date birthDate;
     private String email;
     private LocalDateTime createDate;

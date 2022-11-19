@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/authors")
@@ -33,8 +34,16 @@ public class AuthorController {
         return new ResponseEntity<>(authorPage, HttpStatus.OK);
     }
 
+    @GetMapping("/allauthors")
+    public ResponseEntity<List<Author>> getAll(){
+
+        List<Author> authors = authorService.findAll();
+
+        return new ResponseEntity<>(authors,HttpStatus.OK);
+    }
+
     /* Get One Author with Author Id */
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<Author> getAuthorById(@PathVariable Long id){
         Author author = authorService.getAuthorById(id);
         return new ResponseEntity<>(author,HttpStatus.OK);

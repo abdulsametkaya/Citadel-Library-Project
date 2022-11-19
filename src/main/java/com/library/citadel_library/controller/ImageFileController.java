@@ -48,4 +48,11 @@ public class ImageFileController {
 		return new ResponseEntity<>(imageFile.getData(),header,HttpStatus.OK);
 	}
 
+	@PutMapping("/update/{id}")
+	public ResponseEntity<String> updateFile(@PathVariable String id, @RequestParam("file") MultipartFile file){
+		String imageId= imageFileService.updateImage(id,file);
+
+		return ResponseEntity.ok(imageId);
+	}
+
 }

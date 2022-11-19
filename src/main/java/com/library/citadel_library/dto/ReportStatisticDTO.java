@@ -22,4 +22,5 @@ public class ReportStatisticDTO {
    private Integer expiredBookNumber;
 
    private Integer membersNumber;
+
 }

@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name="tbl_author")
+@Table(name = "tbl_author")
 public class Author {
 
 
@@ -20,11 +20,12 @@ public class Author {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotNull(message="Please provide name")
-    @Size(min=4, max=70,message="Your name '${validatedValue}' must be between {min} and {max} chars long")
-    @Column(length = 70,nullable = false)
+    @NotNull(message = "Please provide name")
+    @Size(min = 4, max = 70, message = "Your name '${validatedValue}' must be between {min} and {max} chars long")
+    @Column(length = 70, nullable = false)
     private String name;
 
+    @NotNull(message = "Please provide select builtIn")
     @Column(nullable = false)
     private Boolean builtIn = false;
 

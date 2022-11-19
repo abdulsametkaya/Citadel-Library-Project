@@ -36,5 +36,28 @@ public class ImageFileService {
 				orElseThrow(()->new ResourceNotFoundException(String.format(ErrorMessage.IMAGE_NOT_FOUND_MESSAGE, id)));
 		return imageFile;
 	}
-	
+
+	public String updateImage(String id, MultipartFile file) {
+
+		ImageFile foundImage = imageFileRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException
+				(String.format(ErrorMessage.IMAGE_NOT_FOUND_MESSAGE, id)));
+
+		String fileName= StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+		ImageFile image;
+		try {
+			image = new ImageFile(fileName, file.getContentType(), file.getBytes());
+		} catch (IOException e) {
+			throw new ImageFileException(ErrorMessage.IMAGE_NOT_FOUND_MESSAGE);
+		}
+
+		foundImage.setData(image.getData());
+		foundImage.setName(image.getName());
+		foundImage.setType(image.getType());
+
+		imageFileRepository.save(foundImage);
+
+		return foundImage.getId();
+	}
+
+
 }

@@ -1,14 +1,13 @@
 package com.library.citadel_library.controller;
 
 
-
 import com.library.citadel_library.dto.UserCreateDTO;
 import com.library.citadel_library.dto.UserDTO;
 import com.library.citadel_library.dto.requests.AdminUpdateUserRequest;
 import com.library.citadel_library.dto.requests.UpdatePasswordRequest;
 import com.library.citadel_library.dto.requests.UserUpdateRequest;
 import com.library.citadel_library.dto.response.CLResponse;
-import com.library.citadel_library.dto.response.UserLoansResponse;
+import com.library.citadel_library.dto.response.LoanResponse;
 import com.library.citadel_library.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -87,19 +86,13 @@ public class UserController {
 
     // http://localhost:8080/users/loans  -
     //It will return the authenticated user object it should return the corresponding book object in response
+    // Yenilendi.
     @GetMapping("/loans")
     @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('MEMBER')")
-    public ResponseEntity<Page<UserLoansResponse>> getUserLoansPage(@RequestParam(required = false, value = "page",defaultValue = "0") int page,
-                                                                    @RequestParam(required = false, value = "size",defaultValue = "20") int size,
-                                                                    @RequestParam(required = false, value = "sort",defaultValue = "id") String prop,
-                                                                    @RequestParam(required = false, value = "direction",defaultValue = "DESC")Sort.Direction direction,
-                                                                    HttpServletRequest request){
+    public ResponseEntity<List<LoanResponse>> getUserLoansPage(HttpServletRequest request){
         Long id =(Long)request.getAttribute("id");
-        Pageable pageable = PageRequest.of(page,size,Sort.by(direction,prop));
-        Page<UserLoansResponse> userLoansPage = userService.getUserLoans(id,pageable);
+        List<LoanResponse> userLoansPage = userService.getUserLoans(id);
         return ResponseEntity.ok(userLoansPage);
-
-
     }
     // http://localhost:8080/users/delete/43
     @PutMapping("/delete/{id}")
@@ -112,18 +105,17 @@ public class UserController {
 
     // http://localhost:8080/users/2 -
     //It will return the updated user object admin can update any type of user,while an employee can update only member-type users.
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
-    public ResponseEntity<UserDTO>  updateUserByAdminOrStaff(HttpServletRequest request,@PathVariable Long id, @Valid @RequestBody AdminUpdateUserRequest adminUpdateUserRequest){
-      Long idLogin = (Long) request.getAttribute("id");
-       UserDTO userDTO =  userService.updateUserByAdminOrStaff(id,idLogin,adminUpdateUserRequest);
+    @PutMapping("/{id}/auth")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserDTO>  updateUserByAdminOrStaff(@PathVariable Long id, @Valid @RequestBody AdminUpdateUserRequest adminUpdateUserRequest){
+     UserDTO userDTO = userService.updateUserByAdminOrStaff(id,adminUpdateUserRequest);
 
-       return ResponseEntity.ok(userDTO);
+     return ResponseEntity.ok(userDTO);
     }
 
 
     @PatchMapping
-    @PreAuthorize("hasRole('MEMBER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('MEMBER')")
     public ResponseEntity<UserDTO> updateUser(HttpServletRequest request, @Valid @RequestBody UserUpdateRequest userUpdateRequest){
       Long id = (Long) request.getAttribute("id");
       UserDTO userDTO = userService.updateUser(id,userUpdateRequest);

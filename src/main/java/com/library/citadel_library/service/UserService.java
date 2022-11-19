@@ -8,7 +8,7 @@ import com.library.citadel_library.dto.UserCreateDTO;
 import com.library.citadel_library.dto.UserDTO;
 import com.library.citadel_library.dto.mapper.UserMapper;
 import com.library.citadel_library.dto.requests.*;
-import com.library.citadel_library.dto.response.UserLoansResponse;
+import com.library.citadel_library.dto.response.LoanResponse;
 import com.library.citadel_library.exception.BadRequestException;
 import com.library.citadel_library.exception.ConflictException;
 import com.library.citadel_library.exception.ResourceNotFoundException;
@@ -56,10 +56,10 @@ public class UserService {
         RoleType loginUser = loginUserRoles.stream().findFirst().get().getName();
 
         if (loginUser.equals(RoleType.ROLE_STAFF)) {
-           createUser.setRoles(setRoles(3L));
+            createUser.setRoles(convertRoles(userCreateDTO.getRoleName()));
         }
-        if(loginUser.equals(RoleType.ROLE_ADMIN)){
-           createUser.setRoles( setRoles(userCreateDTO.getRoleId()));
+        if (loginUser.equals(RoleType.ROLE_ADMIN)) {
+            createUser.setRoles(convertRoles(userCreateDTO.getRoleName()));
         }
 
         String encodedPassword = passwordEncoder.encode(userCreateDTO.getPassword());
@@ -130,7 +130,7 @@ public class UserService {
         if (user.getBuiltIn()) {
             throw new BadRequestException(String.format(ErrorMessage.CANT_PROCESS__WITH_BUILT_IN_TRUE_USER));
         }
-        if (!user.getIsActive()){
+        if (!user.getIsActive()) {
             throw new BadRequestException("User is not already active");
         }
 
@@ -146,34 +146,20 @@ public class UserService {
         return userMapper.userToUserDTO(user);
     }
 
-    public UserDTO updateUserByAdminOrStaff(Long id, Long idLogin, AdminUpdateUserRequest adminUpdateUserRequest) {
-
+    public UserDTO updateUserByAdminOrStaff(Long id, AdminUpdateUserRequest adminUpdateUserRequest) {
         boolean emailExist = userRepository.existsByEmail(adminUpdateUserRequest.getEmail());
 
         User user = userRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND_MESSAGE, id)));
 
-        User userLogin = userRepository.findById(idLogin).orElseThrow(() ->
-                new ResourceNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND_MESSAGE, idLogin)));
-
         if (user.getBuiltIn()) {
             throw new BadRequestException(ErrorMessage.CANT_PROCESS__WITH_BUILT_IN_TRUE_USER);
         }
 
-        Set<Role> userRoles = user.getRoles();
-        RoleType updateRoleName = userRoles.stream().findFirst().get().getName();
-        Set<Role> userloginRole= userLogin.getRoles();
-        RoleType loginUserRole = userloginRole.stream().findFirst().get().getName();
-
-        if (loginUserRole.equals(RoleType.ROLE_STAFF) && updateRoleName.equals(RoleType.ROLE_ADMIN)) {
-            throw new BadRequestException(ErrorMessage.STAFF_DOESNT_PROCESS_ABOUT_ADMIN);
-        }
-        if (loginUserRole.equals(RoleType.ROLE_STAFF) && updateRoleName.equals(RoleType.ROLE_STAFF)) {
-            throw new BadRequestException(ErrorMessage.STAFF_DOESNT_PROCESS_ABOUT_OTHER_STAFF);
-        }
         if (emailExist && !adminUpdateUserRequest.getEmail().equals(user.getEmail())) {
-            throw new ConflictException(String.format(ErrorMessage.EMAIL_ALREADY_EXIST_MESSAGE, user.getEmail()));
+            throw new ConflictException(String.format(ErrorMessage.EMAIL_ALREADY_EXIST_MESSAGE,user.getEmail()));
         }
+
         if (adminUpdateUserRequest.getPassword() == null) {
             adminUpdateUserRequest.setPassword(user.getPassword());
         } else {
@@ -182,15 +168,23 @@ public class UserService {
         }
 
         User updateUser = userMapper.adminUpdateUserRequest(adminUpdateUserRequest);
-
-        updateUser.setId(user.getId());
-        updateUser.setRoles(setRoles(adminUpdateUserRequest.getRoles()));
+         updateUser.setRoles(convertRoles(adminUpdateUserRequest.getRoles()));
+         updateUser.setId(user.getId());
 
         userRepository.save(updateUser);
 
         return userMapper.userToUserDTO(updateUser);
+
+
+
+      /*userRepository.update(id, adminUpdateUserRequest.getFirstName(), adminUpdateUserRequest.getLastName(), adminUpdateUserRequest.getPhone(), adminUpdateUserRequest.getEmail(),
+               adminUpdateUserRequest.getAddress(), adminUpdateUserRequest.getBirthDate(),adminUpdateUserRequest.getIsActive(),adminUpdateUserRequest.getBuiltIn(), adminUpdateUserRequest.getResetPasswordCode(),
+               adminUpdateUserRequest.getCreateDate(),adminUpdateUserRequest.getScore());*/
+
     }
 
+
+    @Transactional
     public UserDTO updateUser(Long id, UserUpdateRequest request) {
         boolean existEmail = userRepository.existsByEmail(request.getEmail());
 
@@ -218,8 +212,8 @@ public class UserService {
 
     public void updatePassword(Long id, UpdatePasswordRequest passwordRequest) {
 
-        User user = userRepository.findById(id).orElseThrow(()->
-                new ResourceNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND_MESSAGE,id)));
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND_MESSAGE, id)));
 
         if (user.getBuiltIn()) {
             throw new BadRequestException(ErrorMessage.CANT_PROCESS__WITH_BUILT_IN_TRUE_USER);
@@ -236,12 +230,12 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public Page<UserLoansResponse> getUserLoans(Long id, Pageable pageable) {
+    public List<LoanResponse> getUserLoans(Long id) {
 
         User user = userRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND_MESSAGE, id)));
 
-        Page<UserLoansResponse> authUserLoans = loanRepository.getAuthUserLoans(id, pageable);
+        List<LoanResponse> authUserLoans = loanRepository.getAuthUserLoans(id);
 
         if (authUserLoans.isEmpty()) {
             throw new ResourceNotFoundException(String.format(ErrorMessage.LOAN_NOT_FOUND_MESSAGE, id));
@@ -250,19 +244,50 @@ public class UserService {
         return authUserLoans;
     }
 
-    public  Set<Role> setRoles(Long roleId){
-        Set<Role>role = new HashSet<>();
-       Role adminRole= roleRepository.findByName(RoleType.ROLE_ADMIN).orElseThrow(()->new ResourceNotFoundException(ErrorMessage.ROLE_NOT_FOUND_MESSAGE));
-       Role staffRole= roleRepository.findByName(RoleType.ROLE_STAFF).orElseThrow(()->new ResourceNotFoundException(ErrorMessage.ROLE_NOT_FOUND_MESSAGE));
-       Role memberRole= roleRepository.findByName(RoleType.ROLE_MEMBER).orElseThrow(()->new ResourceNotFoundException(ErrorMessage.ROLE_NOT_FOUND_MESSAGE));
-        if (roleId==1){
+    public Set<Role> setRoles(Long roleId) {
+        Set<Role> role = new HashSet<>();
+        Role adminRole = roleRepository.findByName(RoleType.ROLE_ADMIN).orElseThrow(() -> new ResourceNotFoundException(ErrorMessage.ROLE_NOT_FOUND_MESSAGE));
+        Role staffRole = roleRepository.findByName(RoleType.ROLE_STAFF).orElseThrow(() -> new ResourceNotFoundException(ErrorMessage.ROLE_NOT_FOUND_MESSAGE));
+        Role memberRole = roleRepository.findByName(RoleType.ROLE_MEMBER).orElseThrow(() -> new ResourceNotFoundException(ErrorMessage.ROLE_NOT_FOUND_MESSAGE));
+        if (roleId == 1) {
             role.add(adminRole);
-        }else if (roleId==2){
+        } else if (roleId == 2) {
             role.add(staffRole);
-        }else{
+        } else {
             role.add(memberRole);
         }
         return role;
     }
 
+    private Set<Role> convertRoles(String userStrRoles) {
+
+        Set<Role> roles = new HashSet<>();
+
+        if (userStrRoles == null) {
+            Role userRole = roleRepository.findByName(RoleType.ROLE_MEMBER).orElseThrow(() ->
+                    new ResourceNotFoundException(String.format(ErrorMessage.ROLE_NOT_FOUND_MESSAGE, RoleType.ROLE_MEMBER.name())));
+            roles.add(userRole);
+        } else {
+
+                switch (userStrRoles) {
+                    case "Administrator":
+                        Role adminRole = roleRepository.findByName(RoleType.ROLE_ADMIN).orElseThrow(() ->
+                                new ResourceNotFoundException(String.format(ErrorMessage.ROLE_NOT_FOUND_MESSAGE, RoleType.ROLE_ADMIN.name())));
+                        roles.add(adminRole);
+                        break;
+                    case "Staff":
+                        Role staffRole = roleRepository.findByName(RoleType.ROLE_STAFF).orElseThrow(() ->
+                                new ResourceNotFoundException(String.format(ErrorMessage.ROLE_NOT_FOUND_MESSAGE, RoleType.ROLE_STAFF.name())));
+                        roles.add(staffRole);
+                        break;
+                    default:
+                        Role userRole = roleRepository.findByName(RoleType.ROLE_MEMBER).orElseThrow(() ->
+                                new ResourceNotFoundException(String.format(ErrorMessage.ROLE_NOT_FOUND_MESSAGE, RoleType.ROLE_MEMBER.name())));
+                        roles.add(userRole);
+                }
+
+        }
+        return roles;
+
+    }
 }

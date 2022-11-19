@@ -25,5 +25,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select new com.library.citadel_library.dto.UserDTO(user) from User user where user.isActive=true and (user.firstName= :query or user.lastName= :query or user.email= :query or user.phone= :query or :query is null)")
     Page<UserDTO> findUsersQueryOptionalSearchWithPage(@Param("query") Optional<String> query, Pageable pageable);
 
+
 }
+
 

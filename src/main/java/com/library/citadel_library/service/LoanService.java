@@ -5,11 +5,7 @@ import com.library.citadel_library.domain.Loan;
 import com.library.citadel_library.domain.User;
 import com.library.citadel_library.dto.LoanDTO;
 import com.library.citadel_library.dto.mapper.LoanMapper;
-import com.library.citadel_library.dto.requests.LoanUpdateRequest;
-import com.library.citadel_library.dto.response.LoanResponse;
-import com.library.citadel_library.dto.response.LoanResponseBook;
-import com.library.citadel_library.dto.response.LoanResponseBookUser;
-import com.library.citadel_library.dto.response.LoanUpdateResponse;
+import com.library.citadel_library.dto.response.*;
 import com.library.citadel_library.exception.BadRequestException;
 import com.library.citadel_library.exception.ResourceNotFoundException;
 import com.library.citadel_library.exception.message.ErrorMessage;
@@ -45,7 +41,7 @@ public class LoanService {
                 (String.format(ErrorMessage.BOOK_NOT_FOUND_MESSAGE, loanDTO.getBookId())));
       Boolean isLoanable =  book.getLoanable();
         if(!isLoanable){
-            throw new BadRequestException("kitap alamazsın müsait değil.");
+            throw new BadRequestException("Book not available.");
         }
 
         User user= userRepository.findById(loanDTO.getUserId()).orElseThrow(()->
@@ -60,12 +56,14 @@ public class LoanService {
         Loan loan = new Loan();
         loan.setUser(user);
         loan.setBook(book);
+        loan.setNotes(loanDTO.getNotes());
         loan.setExpireDate(ld.plusDays(calculateDay(user.getScore())));
         loan.setLoanDate(ld);
 
        loanRepository.save(loan);
 
        loanDTO.setId(loan.getId());
+       loanDTO.setNotes(loan.getNotes());
        loanDTO.setExpireDate(loan.getExpireDate());
        book.setLoanable(false);
        bookRepository.save(book);
@@ -101,9 +99,9 @@ public class LoanService {
                 sayac++;
                 Boolean expired =  l.getExpireDate().isBefore(ld);
                 if(expired){
-                    throw new BadRequestException("Aldığınız kitabın iade tarihi geciktiğin için kitap alamazsın.");
+                    throw new BadRequestException("Your book has expired date, can not borrow book.");
                 }else if(sayac>=maxBookLoan){
-                    throw new BadRequestException("Kitap alma kotanızı doldurdunuz, Yeni kitap almak için elinizdekilerden iade etmelisiniz.");
+                    throw new BadRequestException("Reached Your Book Quota.");
                 }
             }
         }
@@ -129,7 +127,7 @@ public class LoanService {
     }
 
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<LoanResponse> getAuthenticatedUserLoans(Pageable pageable,Long idLogin) {
         User user= userRepository.findById(idLogin).orElseThrow(()->
                 new ResourceNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND_MESSAGE, idLogin)));
@@ -140,8 +138,6 @@ public class LoanService {
 
         return authUserLoans;
     }
-
-
 
     public LoanResponse getAuthenticatedUserLoanWithId(Long idLogin, Long id) {
         User user= userRepository.findById(idLogin).orElseThrow(()->
@@ -175,8 +171,8 @@ public class LoanService {
         return authUserLoans;
     }
 
-    public LoanResponseBookUser getloanBookAndUser(Long id) {
-        LoanResponseBookUser loan = loanRepository.getAnyUserLoanByEmployeAnyAdmin(id);
+    public LoanResponse getloanBookAndUser(Long id) {
+        LoanResponse loan = loanRepository.getAnyUserLoanByEmployeAnyAdmin(id);
 
         if(loan == null) throw new BadRequestException("Kayıt bulunamamıştır");
         return loan;
@@ -184,7 +180,7 @@ public class LoanService {
 
 
 
-    public LoanUpdateResponse updateLoan(Long id, LoanUpdateRequest loanUpdateRequest) {
+    public LoanUpdateResponse deleteLoan(Long id) {
 
         Loan loan = loanRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException
                 (String.format(ErrorMessage.LOAN_NOT_FOUND_MESSAGE, id)));
@@ -195,9 +191,7 @@ public class LoanService {
         User user= userRepository.findById(loan.getUser().getId()).orElseThrow(()->
                 new ResourceNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND_MESSAGE, id)));
 
-        loan.setNotes(loanUpdateRequest.getNotes());
-        loan.setExpireDate(loanUpdateRequest.getExpireDate());
-        loan.setReturnDate(loanUpdateRequest.getReturnDate());
+        loan.setReturnDate(LocalDateTime.now());
         loanRepository.save(loan);
 
         book.setLoanable(true);
@@ -218,7 +212,17 @@ public class LoanService {
         loanUpdateResponse.setNotes(loan.getNotes());
         loanUpdateResponse.setReturnDate(loan.getReturnDate());
 
-
         return loanUpdateResponse;
+    }
+
+    public Page<LoanAmountCategoryResponse> getMostLoanBookAmountOfCategory(Long id,Pageable pageable) {
+        User user= userRepository.findById(id).orElseThrow(()->
+                new ResourceNotFoundException(String.format(ErrorMessage.USER_NOT_FOUND_MESSAGE, id)));
+
+        Page<LoanAmountCategoryResponse> loan = loanRepository.userLoansCountWithCategoryName(id,pageable);
+
+        if(loan == null) throw new BadRequestException("Kayıt bulunamamıştır");
+        return loan;
+
     }
 }

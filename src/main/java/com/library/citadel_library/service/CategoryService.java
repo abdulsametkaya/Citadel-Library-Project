@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CategoryService {
 
@@ -67,5 +69,9 @@ public class CategoryService {
                 new ResourceNotFoundException(String.format(ErrorMessage.CATEGORY_NOT_FOUND_MESSAGE, id)));
 
         return foundCategory;
+    }
+
+    public List<Category> findAll() {
+        return categoryRepository.findAll();
     }
 }

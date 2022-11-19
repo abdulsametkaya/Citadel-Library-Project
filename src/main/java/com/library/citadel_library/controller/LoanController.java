@@ -1,11 +1,7 @@
 package com.library.citadel_library.controller;
 
 import com.library.citadel_library.dto.LoanDTO;
-import com.library.citadel_library.dto.requests.LoanUpdateRequest;
-import com.library.citadel_library.dto.response.LoanResponse;
-import com.library.citadel_library.dto.response.LoanResponseBook;
-import com.library.citadel_library.dto.response.LoanResponseBookUser;
-import com.library.citadel_library.dto.response.LoanUpdateResponse;
+import com.library.citadel_library.dto.response.*;
 import com.library.citadel_library.service.LoanService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,6 +23,7 @@ public class LoanController {
 
     private LoanService loanService;
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     @PostMapping("/add")
     public ResponseEntity<LoanDTO> createLoan(@Valid @RequestBody LoanDTO loanDTO){
 
@@ -36,15 +33,15 @@ public class LoanController {
     }
 
     //It will return own loans of authenticated user
-    @PreAuthorize("hasRole('MEMBER')")
+    @PreAuthorize("hasRole('MEMBER') or hasRole('ADMIN') or hasRole('STAFF')")
     @GetMapping()
     public ResponseEntity<Page<LoanResponse>> getAuthenticatedUserLoansWithPage(HttpServletRequest request,
                                                           @RequestParam(required = false, value = "page", defaultValue = "0") int page,
                                                           @RequestParam(required = false,value = "size", defaultValue = "20") int size,
                                                           @RequestParam(required = false,value = "sort", defaultValue = "loanDate") String prop,
-                                                          @RequestParam(required = false,value = "type", defaultValue = "DESC") Sort.Direction type){
+                                                          @RequestParam(required = false,value = "direction", defaultValue = "DESC") Sort.Direction direction){
 
-        Pageable pageable = PageRequest.of(page,size,Sort.by(type,prop));
+        Pageable pageable = PageRequest.of(page,size,Sort.by(direction,prop));
         Long idLogin = (Long) request.getAttribute("id");
         Page<LoanResponse> loanAutUser = loanService.getAuthenticatedUserLoans(pageable,idLogin);
 
@@ -69,9 +66,9 @@ public class LoanController {
                                                                @RequestParam(required = false, value = "page", defaultValue = "0") int page,
                                                                @RequestParam(required = false,value = "size", defaultValue = "20") int size,
                                                                @RequestParam(required = false,value = "sort", defaultValue = "loanDate") String prop,
-                                                               @RequestParam(required = false,value = "type", defaultValue = "DESC") Sort.Direction type){
+                                                               @RequestParam(required = false,value = "direction", defaultValue = "DESC") Sort.Direction direction){
 
-        Pageable pageable = PageRequest.of(page,size,Sort.by(type,prop));
+        Pageable pageable = PageRequest.of(page,size,Sort.by(direction,prop));
         Page<LoanResponse> loanSpecifiedUser = loanService.getLoansSpecifiedUserById(pageable,id);
 
         return ResponseEntity.ok(loanSpecifiedUser);
@@ -84,9 +81,9 @@ public class LoanController {
                                                                @RequestParam(required = false, value = "page", defaultValue = "0") int page,
                                                                @RequestParam(required = false,value = "size", defaultValue = "20") int size,
                                                                @RequestParam(required = false,value = "sort", defaultValue = "loanDate") String prop,
-                                                               @RequestParam(required = false,value = "type", defaultValue = "DESC") Sort.Direction type){
+                                                               @RequestParam(required = false,value = "direction", defaultValue = "DESC") Sort.Direction direction){
 
-        Pageable pageable = PageRequest.of(page,size,Sort.by(type,prop));
+        Pageable pageable = PageRequest.of(page,size,Sort.by(direction,prop));
         Page<LoanResponseBook> loanSpecifiedUser = loanService.getLoansSpecifiedBookById(pageable,id);
 
         return ResponseEntity.ok(loanSpecifiedUser);
@@ -95,9 +92,9 @@ public class LoanController {
     //It will return details of a loan of any user
     @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
     @GetMapping("/auth/{id}")
-    public ResponseEntity<LoanResponseBookUser> getAuthenticatedUserLoanId(@PathVariable  Long id){
+    public ResponseEntity<LoanResponse> getAuthenticatedUserLoanId(@PathVariable  Long id){
 
-        LoanResponseBookUser loanAutUser = loanService.getloanBookAndUser(id);
+        LoanResponse loanAutUser = loanService.getloanBookAndUser(id);
 
         return ResponseEntity.ok(loanAutUser);
     }
@@ -105,11 +102,28 @@ public class LoanController {
 
     //It will update the loan
     @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
-    @PutMapping("/{id}")
-    public ResponseEntity<LoanUpdateResponse> updateLoan(@PathVariable Long id, @Valid @RequestBody LoanUpdateRequest loanUpdateRequest){
+    @PutMapping("/update/{id}")
+    public ResponseEntity<LoanUpdateResponse> deleteLoan(@PathVariable Long id, String update){
 
-        LoanUpdateResponse loanUpdate = loanService.updateLoan(id,loanUpdateRequest);
+        LoanUpdateResponse loanDelete = loanService.deleteLoan(id);
 
-        return ResponseEntity.ok(loanUpdate);
+        return ResponseEntity.ok(loanDelete);
     }
+
+
+    //It will return most loan book amount of category authenticated user
+    @PreAuthorize("hasRole('MEMBER')")
+    @GetMapping("/mostcategory")
+    public ResponseEntity<Page<LoanAmountCategoryResponse>> getMostLoanBookAmountOfCategory(HttpServletRequest request,
+                                                                                            @RequestParam(required = false, value = "page", defaultValue = "0") int page,
+                                                                                            @RequestParam(required = false,value = "size", defaultValue = "6") int size
+                                                                                            ){
+
+        Long idLogin = (Long) request.getAttribute("id");
+        Pageable pageable = PageRequest.of(page,size);
+        Page<LoanAmountCategoryResponse> loanAutUserCategory = loanService.getMostLoanBookAmountOfCategory(idLogin,pageable);
+
+        return ResponseEntity.ok(loanAutUserCategory);
+    }
+
 }
